@@ -20,6 +20,15 @@ function openCreatePostModal() {
 
     deferredPrompt = null;
   }
+
+  if('serviceWorker' in navigartor) {
+    navigator.serviceWorker.getRegistrations()
+      .then(function(registerations) {
+        for(var i=0; i< registerations.length; i++) {
+          registerations[i].unregister();
+        }
+      })
+  }
 }
 
 function closeCreatePostModal() {
@@ -78,7 +87,16 @@ function createCard() {
 var url = 'https://httpbin.org/get';
 var networDataReceived = false;
 
-fetch(url)
+fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  body: JSON.stringify({
+    message: 'Some Message'
+  })
+})
   .then(function(res) {
     return res.json();
   })
