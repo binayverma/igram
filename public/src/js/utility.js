@@ -1,6 +1,10 @@
-var dbPromise = idb.open('posts-store', 1, function(db) {
-  if(!db.objectStoreNames.contains('posts')){
+
+var dbPromise = idb.open('posts-store', 1, function (db) {
+  if (!db.objectStoreNames.contains('posts')) {
     db.createObjectStore('posts', {keyPath: 'id'});
+  }
+  if (!db.objectStoreNames.contains('sync-posts')) {
+    db.createObjectStore('sync-posts', {keyPath: 'id'});
   }
 });
 
@@ -20,7 +24,7 @@ function readAllData(st) {
       var tx = db.transaction(st, 'readonly');
       var store = tx.objectStore(st);
       return store.getAll();
-    })
+    });
 }
 
 function clearAllData(st) {
@@ -30,11 +34,11 @@ function clearAllData(st) {
       var store = tx.objectStore(st);
       store.clear();
       return tx.complete;
-    })
+    });
 }
 
 function deleteItemFromData(st, id) {
-  return dbPromise
+  dbPromise
     .then(function(db) {
       var tx = db.transaction(st, 'readwrite');
       var store = tx.objectStore(st);
@@ -42,6 +46,6 @@ function deleteItemFromData(st, id) {
       return tx.complete;
     })
     .then(function() {
-      console.log('Item Deleted!')
-    })
+      console.log('Item deleted!');
+    });
 }
