@@ -124,7 +124,7 @@ if ('indexedDB' in window) {
 }
 
 function sendData() {
-  fetch('https://igram-d265e.firebaseio.com/posts.json', {
+  fetch('https://us-central1-igram-d265e.cloudfunctions.net/storePostData', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
