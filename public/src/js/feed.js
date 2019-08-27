@@ -2,6 +2,9 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
+var form = document.querySelector('form');
+var titleInput = document.querySelector('#title');
+var locationInput = document.querySelector('#location');
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
@@ -24,14 +27,14 @@ function openCreatePostModal() {
     deferredPrompt = null;
   }
 
-  if('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations()
-      .then(function(registerations) {
-        for(var i=0; i< registerations.length; i++) {
-          registerations[i].unregister();
-        }
-      })
-  }
+  // if('serviceWorker' in navigator) {
+  //   navigator.serviceWorker.getRegistrations()
+  //     .then(function(registerations) {
+  //       for(var i=0; i< registerations.length; i++) {
+  //         registerations[i].unregister();
+  //       }
+  //     })
+  // }
 }
 
 function closeCreatePostModal() {
@@ -87,6 +90,7 @@ function createCard(data) {
 }
 
 function updateUI(data){
+  clearCards();
   for(var i=0; i < data.length; i++){
     createCard(data[i]);
   }
@@ -118,3 +122,58 @@ if ('indexedDB' in window) {
       }
     })
 }
+
+function sendData() {
+  fetch('https://igram-d265e.firebaseio.com/posts.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      title: titleInput.value,
+      location: locationInput.value,
+      image: "https://firebasestorage.googleapis.com/v0/b/igram-d265e.appspot.com/o/sf-boat.jpg?alt=media&token=cfbb5ed4-c9e1-41e7-bdc3-2e0c5b7f0f8b"
+    }),
+  })
+  .then(function(res) {
+    console.log('Sent data', res);
+    updateUI();
+  })
+}
+
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  if(titleInput.value.trim() === '' || locationInput.value.trim() === ''){
+    alert('Please enter valid data!')
+  }
+
+  closeCreatePostModal();
+
+  if('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready
+      .then(function(sw) {
+        var post = {
+          id: new Date().toISOString(),
+          title: titleInput.value,
+          location: locationInput.value
+        };
+        writeData('sync-posts', post)
+          .then(function() {
+            return sw.sync.register('sync-new-posts');
+          })
+          .then(function() {
+            var snackbarContainer = document.querySelector('#confirmation-toast');
+            var data = {message: 'Your Post was saved for syncing!'};
+            snackbarContainer.MaterialSnackbar.showSnackbar(data);
+          })
+          .catch(function(err) {
+            console.log(err);
+          })
+      });
+  } else {
+    sendData();
+  }
+});

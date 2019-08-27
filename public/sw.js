@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-var CACHE_STATIC_NAME = 'static-v18';
+var CACHE_STATIC_NAME = 'static-v19';
 var CACHE_DYNAMIC_NAME = 'dynamic-v2';
 var STATIC_FILES = [
   '/',
@@ -186,3 +186,39 @@ self.addEventListener('fetch', function(event) {
 //     fetch(event.request)
 //   );
 // });
+
+self.addEventListener('sync', function(event) {
+  console.log('[Service Worker] Background syncing', event);
+  if(event.tag === 'sync-new-posts') {
+    console.log('[Service Worker] Syncing new posts');
+    event.waitUntil(
+      readAllData('sync-posts')
+        .then(function(data) {
+          for(var dt of data) {
+            fetch('https://igram-d265e.firebaseio.com/posts.json', {
+              method: 'POST',
+              header: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({
+                id: dt.id,
+                title: dt.title,
+                location: dt.location,
+                image: "https://firebasestorage.googleapis.com/v0/b/igram-d265e.appspot.com/o/sf-boat.jpg?alt=media&token=cfbb5ed4-c9e1-41e7-bdc3-2e0c5b7f0f8b"
+              }),
+          })
+            .then(function(res) {
+              console.log('Sent data', res);
+              if(res.ok) {
+                deleteItemFromData('sync-posts', dt.id)
+              }
+            })
+            .catch(function() {
+              console.log('Error while sending data', err)
+            })
+          }
+        })
+    );
+  }
+});
