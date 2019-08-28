@@ -219,7 +219,7 @@ self.addEventListener('sync', function(event) {
                 deleteItemFromData('sync-posts', dt.id)
               }
             })
-            .catch(function() {
+            .catch(function(err) {
               console.log('Error while sending data', err)
             })
           }
