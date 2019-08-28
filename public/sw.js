@@ -195,7 +195,8 @@ self.addEventListener('sync', function(event) {
       readAllData('sync-posts')
         .then(function(data) {
           for(var dt of data) {
-            fetch('https://us-central1-igram-d265e.cloudfunctions.net/storePostData', {
+            // fetch('https://us-central1-igram-d265e.cloudfunctions.net/storePostData', {
+              fetch('https://igram-d265e.firebaseio.com/posts.json', {
               method: 'POST',
               header: {
                 'Content-Type': 'application/json',
@@ -211,10 +212,11 @@ self.addEventListener('sync', function(event) {
             .then(function(res) {
               console.log('Sent data', res);
               if(res.ok) {
-                res.json()
-                .then(function(resData) {
-                  deleteItemFromData('sync-posts', resData.id)
-                });
+                // res.json()
+                // .then(function(resData) {
+                //   deleteItemFromData('sync-posts', resData.id)
+                // });
+                deleteItemFromData('sync-posts', dt.id)
               }
             })
             .catch(function() {
