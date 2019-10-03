@@ -65,7 +65,7 @@ function configurePushSub() {
     .then(sub => {
       if(sub === null) {
         // create new subscription
-        let vapidPublicKey = 'BMR42y5FYba4RtFXlhsIBRzxyUC2aHtWMboazXEsmOtNU-wOH99436TJQzt3fVmMQaMqlBedgFgRhLIa-Lw53HU';
+        let vapidPublicKey = 'BEJcyIjtD_s-b4YO8IidkCH9LebQJ8QnqVblBlsx656EQZjLBpOuysZfoyO_qsyf_ucSraN9kiEZ0tLYvikE-N8';
         let convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
         return reg.pushManager.subscribe({
           userVisibleOnly: true,
@@ -92,7 +92,7 @@ function configurePushSub() {
     })
     .catch(err => {
       console.log(err)
-    }) 
+    })
 }
 
 function askForNotificationPermission() {

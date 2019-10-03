@@ -1,13 +1,14 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-var CACHE_STATIC_NAME = 'static-v19';
-var CACHE_DYNAMIC_NAME = 'dynamic-v2';
+var CACHE_STATIC_NAME = 'static-v42';
+var CACHE_DYNAMIC_NAME = 'dynamic-v6';
 var STATIC_FILES = [
   '/',
   '/offline.html',
   '/index.html',
   '/src/js/app.js',
+  '/src/js/utility.js',
   '/src/js/feed.js',
   '/src/js/idb.js',
   '/src/js/promise.js',
@@ -20,12 +21,6 @@ var STATIC_FILES = [
   'https://fonts.googleapis.com/icon?family=Material+Icons',
   'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
 ];
-
-var dbPromise = idb.open('posts-store', 1, function(db) {
-  if(!db.objectStoreNames.contains('posts')){
-    db.createObjectStore('posts', {keyPath: 'id'});
-  }
-});
 
 // function trimeCache(cacheName, maxItems) {
 //   caches.open(cacheName)
@@ -189,39 +184,36 @@ self.addEventListener('fetch', function(event) {
 
 self.addEventListener('sync', function(event) {
   console.log('[Service Worker] Background syncing', event);
-  if(event.tag === 'sync-new-posts') {
-    console.log('[Service Worker] Syncing new posts');
+  if (event.tag === 'sync-new-posts') {
+    console.log('[Service Worker] Syncing new Posts');
     event.waitUntil(
       readAllData('sync-posts')
         .then(function(data) {
-          for(var dt of data) {
-            // fetch('https://us-central1-igram-d265e.cloudfunctions.net/storePostData', {
-              fetch('https://igram-d265e.firebaseio.com/posts.json', {
+          for (var dt of data) {
+            var postData = new FormData();
+            postData.append('id', dt.id);
+            postData.append('title', dt.title);
+            postData.append('location', dt.location);
+            postData.append('rawLocationLat', dt.rawLocation.lat);
+            postData.append('rawLocationLng', dt.rawLocation.lng);
+            postData.append('file', dt.picture, dt.id + '.png');
+
+            fetch('https://us-central1-igram-d265e.cloudfunctions.net/storePostData', {
               method: 'POST',
-              header: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              body: JSON.stringify({
-                id: dt.id,
-                title: dt.title,
-                location: dt.location,
-                image: "https://firebasestorage.googleapis.com/v0/b/igram-d265e.appspot.com/o/sf-boat.jpg?alt=media&token=cfbb5ed4-c9e1-41e7-bdc3-2e0c5b7f0f8b"
-              }),
-          })
-            .then(function(res) {
-              console.log('Sent data', res);
-              if(res.ok) {
-                // res.json()
-                // .then(function(resData) {
-                //   deleteItemFromData('sync-posts', resData.id)
-                // });
-                deleteItemFromData('sync-posts', dt.id)
-              }
+              body: postData
             })
-            .catch(function(err) {
-              console.log('Error while sending data', err)
-            })
+              .then(function(res) {
+                console.log('Sent data', res);
+                if (res.ok) {
+                  res.json()
+                    .then(function(resData) {
+                      deleteItemFromData('sync-posts', resData.id);
+                    });
+                }
+              })
+              .catch(function(err) {
+                console.log('Error while sending data', err);
+              });
           }
         })
     );
@@ -230,40 +222,41 @@ self.addEventListener('sync', function(event) {
 
 
 self.addEventListener('notificationclick', function(event) {
-  let notification = event.notification;
-  let action = event.action;
+  var notification = event.notification;
+  var action = event.action;
 
   console.log(notification);
 
-  if(action === 'confirm') {
+  if (action === 'confirm') {
     console.log('Confirm was chosen');
+    notification.close();
   } else {
     console.log(action);
     event.waitUntil(
       clients.matchAll()
         .then(function(clis) {
           var client = clis.find(function(c) {
-            return c.visibilityState = 'visible';
+            return c.visibilityState === 'visible';
           });
 
-          if(client !== undefined) {
+          if (client !== undefined) {
             client.navigate(notification.data.url);
             client.focus();
           } else {
-            client.openWindow(notification.data.url);
+            clients.openWindow(notification.data.url);
           }
+          notification.close();
         })
     );
   }
-  notification.close();
 });
 
 self.addEventListener('notificationclose', function(event) {
-  console.log('Notification was closed');
+  console.log('Notification was closed', event);
 })
 
 self.addEventListener('push', function(event) {
-  console.log('Push Notification received', event); 
+  console.log('Push Notification received', event);
 
   var data = {titile: 'New!', content: 'Something new happened!', openUrl: '/'};
 
