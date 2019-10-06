@@ -8,7 +8,7 @@ if (!window.Promise) {
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker
-    .register('/sw.js')
+    .register('/service-worker.js')
     .then(function() {
       console.log('Service worker registered!');
     })
@@ -24,31 +24,28 @@ window.addEventListener('beforeinstallprompt', function(event) {
   return false;
 });
 
-function displayConfirmationNotification() {
-  var options = {
-    body: 'You successfully subscribed to our Notification service!',
-    icon: '/src/images/icons/app-icon-96x96.png',
-    image: '/src/images/sf-boat.jpg',
-    dir: 'ltr',
-    lang: 'en-US', // BCP 47
-    vibrate: [100, 50, 200],
-    badge: '/src/images/icons/app-icon-96x96.png',
-    tag: 'confirm-notification',
-    renotify: true,
-    actions: [
-      {action: 'confirm', title: 'Okay', icon: '/src/images/icons/app-icon-96x96.png'},
-      {action: 'cancel', title: 'Cancel', icon: '/src/images/icons/app-icon-96x96.png'},
-    ]
-  };
-  if('serviceWorker' in navigator) {
-    // using serviceWorker
+function displayConfirmNotification() {
+  if ('serviceWorker' in navigator) {
+    var options = {
+      body: 'You successfully subscribed to our Notification service!',
+      icon: '/src/images/icons/app-icon-96x96.png',
+      image: '/src/images/sf-boat.jpg',
+      dir: 'ltr',
+      lang: 'en-US', // BCP 47,
+      vibrate: [100, 50, 200],
+      badge: '/src/images/icons/app-icon-96x96.png',
+      tag: 'confirm-notification',
+      renotify: true,
+      actions: [
+        { action: 'confirm', title: 'Okay', icon: '/src/images/icons/app-icon-96x96.png' },
+        { action: 'cancel', title: 'Cancel', icon: '/src/images/icons/app-icon-96x96.png' }
+      ]
+    };
+
     navigator.serviceWorker.ready
-      .then(swreg => {
-        swreg.showNotification('Successfully subscribed!(sw)', options)
-      })
-  }else {
-    // using Notification API
-    new Notification('Successfully subscribed!', options)
+      .then(function(swreg) {
+        swreg.showNotification('Successfully subscribed!', options);
+      });
   }
 }
 
@@ -65,7 +62,7 @@ function configurePushSub() {
     .then(sub => {
       if(sub === null) {
         // create new subscription
-        let vapidPublicKey = 'BEJcyIjtD_s-b4YO8IidkCH9LebQJ8QnqVblBlsx656EQZjLBpOuysZfoyO_qsyf_ucSraN9kiEZ0tLYvikE-N8';
+        let vapidPublicKey = 'BBu-QGc6-POUg-0T5-JUOveHIsaw0OiW3HnW4wdZqVRxRaot9Hxf7pYO3hsKstSOU6CEbjLD6dhdGcrEpOe88XU';
         let convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
         return reg.pushManager.subscribe({
           userVisibleOnly: true,
