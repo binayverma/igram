@@ -4,19 +4,23 @@
   "description": "A complete guide to PWAs. Building a simple Instagram clone.",
   "main": "index.js",
   "scripts": {
-    "start": "http-server -c-1"
+    "start": "http-server -c-1",
+    "generate-sw": "workbox inject:manifest",
+    "build": "npm run generate-sw"
   },
   "keywords": [
     "pwa",
     "progressive",
     "web",
     "app",
-    "complete",
-    "tutorial"
+    "serviceworkers",
+    "caching",
+    "workbox"
   ],
   "author": "Binay Verma",
   "license": "ISC",
   "devDependencies": {
-    "http-server": "^0.9.0"
+    "http-server": "^0.9.0",
+    "workbox-cli": "^2.1.3"
   }
 }

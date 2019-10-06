@@ -88,8 +88,8 @@ exports.storePostData = functions.https.onRequest(function(request, response) {
               .then(function() {
                 webpush.setVapidDetails(
                   'mailto:vnayverma@gmail.com',
-                  'BEJcyIjtD_s-b4YO8IidkCH9LebQJ8QnqVblBlsx656EQZjLBpOuysZfoyO_qsyf_ucSraN9kiEZ0tLYvikE-N8',
-                  'aLp5KtFAvHYEQWzDCysxbUMNhEiJ1rzcyvy7L4ZGsh8'
+                  'BBu-QGc6-POUg-0T5-JUOveHIsaw0OiW3HnW4wdZqVRxRaot9Hxf7pYO3hsKstSOU6CEbjLD6dhdGcrEpOe88XU',
+                  'kfZWjNLmV2RKQr4p2jEcjRfALtXb-ozAemHKDi_ST-8'
                 );
                 return admin
                   .database()
